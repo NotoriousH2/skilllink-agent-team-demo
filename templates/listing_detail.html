@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} - SkillLink{% endblock %}
+{% block content %}
+<article class="listing-detail">
+  <div class="detail-badges">
+    <span class="badge badge-type">{{ type_labels[listing.type] }}</span>
+    <span class="badge badge-category">{{ category_labels[listing.category] }}</span>
+    <span class="badge badge-status status-{{ listing.status }}">{{ listing_status_labels[listing.status] }}</span>
+  </div>
+  <h1>{{ listing.title }}</h1>
+  <p class="meta">작성자: {{ listing.owner_name }} · {{ listing.created_at }}</p>
+  <p class="description">{{ listing.description }}</p>
+
+  <div class="actions">
+    {% if listing.status == 'open' and viewer_uid != listing.owner_id and not is_operator %}
+    <form method="post" action="/applications">
+      <input type="hidden" name="listing_id" value="{{ listing.id }}">
+      <textarea name="message" rows="2" required minlength="1" maxlength="500" placeholder="신청 메시지 (1~500자)"></textarea>
+      <button type="submit" class="btn btn-primary">신청하기</button>
+    </form>
+    {% endif %}
+    {% if listing.status == 'matched' and (viewer_uid == listing.owner_id or viewer_uid == accepted_applicant_id) %}
+    <form method="post" action="/listings/{{ listing.id }}/complete">
+      <button type="submit" class="btn">완료하기</button>
+    </form>
+    {% endif %}
+    {% if viewer_uid == listing.owner_id and listing.status in ['open', 'matched'] %}
+    <form method="post" action="/listings/{{ listing.id }}/cancel">
+      <button type="submit" class="btn btn-danger">게시물 취소</button>
+    </form>
+    {% endif %}
+    {% if viewer_uid == listing.owner_id and listing.status == 'open' %}
+    <a class="btn" href="/listings/{{ listing.id }}/edit">수정</a>
+    {% endif %}
+  </div>
+
+  <section class="applications">
+    <h2>신청 목록</h2>
+    {% for app in apps %}
+    <div class="application">
+      <div class="app-head">
+        <span class="app-applicant">{{ app.applicant_name }}</span>
+        <span class="badge app-status status-{{ app.status }}">{{ application_status_labels[app.status] }}</span>
+      </div>
+      <p class="app-message">{{ app.message }}</p>
+      <div class="app-actions">
+        {% if app.status == 'pending' and viewer_uid == listing.owner_id and listing.status == 'open' %}
+        <form method="post" action="/applications/{{ app.id }}/accept"><button type="submit" class="btn">수락</button></form>
+        <form method="post" action="/applications/{{ app.id }}/reject"><button type="submit" class="btn btn-danger">거절</button></form>
+        {% endif %}
+        {% if app.status == 'pending' and viewer_uid == app.applicant_id %}
+        <form method="post" action="/applications/{{ app.id }}/cancel"><button type="submit" class="btn btn-danger">취소</button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <p class="empty">아직 신청이 없습니다.</p>
+    {% endfor %}
+  </section>
+</article>
+{% endblock %}

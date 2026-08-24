@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}관리자 - SkillLink{% endblock %}
+{% block content %}
+<h1>관리자 대시보드</h1>
+<section>
+  <h2>게시물 통계</h2>
+  <p>총 게시물: {{ total_listings }}</p>
+  <table class="stats">
+    <tr><th>상태</th>{% for s, n in by_status.items() %}<td>{{ listing_status_labels[s] }}: {{ n }}</td>{% endfor %}</tr>
+    <tr><th>카테고리</th>{% for c, n in by_category.items() %}<td>{{ category_labels[c] }}: {{ n }}</td>{% endfor %}</tr>
+    <tr><th>유형</th>{% for t, n in by_type.items() %}<td>{{ type_labels[t] }}: {{ n }}</td>{% endfor %}</tr>
+  </table>
+</section>
+<section>
+  <h2>신청 통계</h2>
+  <table class="stats">
+    <tr>{% for s, n in app_by_status.items() %}<td>{{ application_status_labels[s] }}: {{ n }}</td>{% endfor %}</tr>
+  </table>
+</section>
+<section>
+  <h2>최근 신청 10개</h2>
+  <ul class="simple-list">
+    {% for a in recent_apps %}
+    <li><a href="/listings/{{ a.listing_id }}">{{ a.listing_title }}</a> — {{ a.applicant_name }} <span class="badge app-status status-{{ a.status }}">{{ application_status_labels[a.status] }}</span></li>
+    {% else %}
+    <li class="empty">신청이 없습니다.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

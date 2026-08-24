@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{% if listing %}게시물 수정{% else %}게시물 만들기{% endif %} - SkillLink{% endblock %}
+{% block content %}
+<h1>{% if listing %}게시물 수정{% else %}게시물 만들기{% endif %}</h1>
+<form method="post" action="{% if listing %}/listings/{{ listing.id }}{% else %}/listings{% endif %}" class="listing-form">
+  <label>제목
+    <input type="text" name="title" value="{{ listing.title if listing else '' }}" required minlength="1" maxlength="80">
+  </label>
+  <label>설명
+    <textarea name="description" rows="4" required minlength="1" maxlength="1000">{{ listing.description if listing else '' }}</textarea>
+  </label>
+  <label>카테고리
+    <select name="category">
+      {% for key, label in category_labels.items() %}
+      <option value="{{ key }}" {% if listing and listing.category == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>유형
+    <select name="type">
+      {% for key, label in type_labels.items() %}
+      <option value="{{ key }}" {% if listing and listing.type == key %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit" class="btn btn-primary">{% if listing %}저장{% else %}만들기{% endif %}</button>
+</form>
+{% endblock %}
