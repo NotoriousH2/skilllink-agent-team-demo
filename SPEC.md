@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS applications (
 | `GET /admin` | operator만(나머지는 403) |
 - operator의 모든 `POST`는 `403`.
 - 상태코드 규칙: 검증 실패=`422`, 권한 실패=`403`, 상태 전환 불가=`409`,
-  존재하지 않는 리소스=`444`가 아니라 `404`. 항상 이 순서로 검사:
+  존재하지 않는 리소스=`404`. 항상 이 순서로 검사:
   존재 확인(404) → 권한(403) → 상태(409) → 필드 검증(422).
 
 ---
@@ -170,7 +170,7 @@ CREATE TABLE IF NOT EXISTS applications (
 | open | application accept | owner | matched | L2/L3 발동, 같은 listing의 다른 pending application 전체 → rejected |
 | open | cancel | owner | cancelled | 같은 listing의 pending application 전체 → rejected |
 | matched | complete | owner 또는 accepted 신청자 | completed | — |
-| matched | cancel | owner 또는 accepted 신청자 | cancelled | — |
+| matched | cancel | owner | cancelled | — |
 - `completed`, `cancelled`는 종결 상태(어떤 액션도 409).
 - `matched` listing에는 `POST /applications`가 409(L3).
 
@@ -285,12 +285,16 @@ owner는 서버가 현재 viewer로 결정한다.
     `?page=0` → 422, `?page=abc` → 422.
 - `tests/test_transitions.py`: 표 기반(table-driven) — 6.1/6.2 표의 모든
   허용 전환이 성공(302 + DB 상태 확인)하고, 표에 없는 (상태, 액션) 조합은
-  모두 409. 최소 행: open cancel, matched complete, matched cancel,
-  completed complete(409), cancelled cancel(409), pending accept(부수효과
+  모두 409. 최소 행: open cancel(owner, 성공), matched cancel(owner, 성공),
+  matched complete(owner, 성공), completed complete(409),
+  cancelled cancel(409), pending accept(부수효과
   검증: 자매 pending → rejected), pending reject, pending cancel,
   accepted accept(409), matched listing에 apply(409), pending 중복 apply(409).
 - `tests/test_permissions.py`: owner가 아닌 수정 → 403, self-apply → 403,
-  operator 생성 → 403, operator accept → 403, operator `/admin` 외 403
+  operator 생성 → 403, operator accept → 403, matched cancel이 owner-only인
+  계약 검증 — matched listing에서 accepted 신청자(또는 그 외 비-owner 데모
+  사용자)가 `POST /listings/{id}/cancel` → 403, owner만 → 302,
+  operator `/admin` 외 403
   케이스: 사용자 1 `/admin` → 403, operator `/activity` → 403.
 - `tests/test_xss.py`: title에 `<script>alert(1)</script>` 저장 → 상세
   페이지 HTML에 raw `<script>alert(1)</script>`가 없고

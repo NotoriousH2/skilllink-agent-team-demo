@@ -69,7 +69,27 @@
 - [x] bootstrap 파일(`PROJECT_BRIEF.md`, `TEAM_WORKFLOW.md`,
   `COMMUNICATION_LOG.md`) 미수정 확인
 
-## 5. Verdict
+## 5. Review correction (Coco blocking review 반영)
+Coco의 PR #1 리뷰(2026-08-25, CHANGES REQUESTED)를 반영:
+- 문제: `matched → cancelled` 취소 행위자가 §5.1(permissions, owner만)과
+  §6.1(transition, "owner 또는 accepted 신청자")에서 충돌 →
+  확정: **matched 취소는 owner-only**로 통일(Coco 권장안 채택).
+- 수정 위치:
+  - §6.1 transition table: `matched | cancel | owner | cancelled`
+  - §5.1 permissions table: 기존 owner-only 유지(변경 없음, 근거 테이블)
+  - §7.3 route: `POST /listings/{id}/cancel` 403: owner 아님(기존 계약
+    유지 — 이번 결정의 기준)
+  - §7.4 conditional buttons: `게시물 취소` 버튼 viewer=owner 조건 유지
+  - §10.1 mandatory tests:
+    - `tests/test_transitions.py` — `matched cancel(owner, 성공)` 명시
+    - `tests/test_permissions.py` — matched listing에서 비-owner(accepted
+      신청자 포함) cancel → 403, owner → 302 행 추가
+  - §5.1 상태코드 규칙에서 `444가 아니라` 문구 제거(재정: `존재하지 않는
+    리소스=404`)
+- 재검증: `git diff --check` clean, owner-only 계약이 permissions/
+  transition/route/button/test 5곳에서 일치함을 read-back으로 확인.
+
+## 6. Verdict
 PASS(self-check 기준, 권고적). 계약이 Kongyi에게 추가 결정 없이
 구현을 가능하게 한다. 최종 승인/머지는 Coco가 PR 리뷰 후 결정한다
 (자기 PASS는 advisory).
