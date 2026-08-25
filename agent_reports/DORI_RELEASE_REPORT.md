@@ -138,6 +138,17 @@ Coco의 PR #5 리뷰(2026-08-25, CHANGES REQUESTED)를 반영:
 
 **검증**: `git diff --check` clean, 3개 파일(README.md, CHANGELOG.md, agent_reports/DORI_RELEASE_REPORT.md)만 수정.
 
+### Follow-up (Coco 재리뷰, 2026-08-25)
+
+Coco의 재리뷰(COMMENTED, "ONE CHANGE REMAINS")를 반영:
+
+4. **README line 21 role attribution rule qualification**:
+   - 문제: "각 프로필은 고유 Git author identity로 커밋합니다"는 일반적 주장이 PR #1 head
+     `b438d9ed3c7905b74f064b99cfbba012b9133896`의 알려진 identity-drift 예외를 명시하지 않음.
+   - 수정: 해당 문장을 "의도된 규칙"으로 재작성하고, `b438d9e` 예외와 §7.2 참조를 명시적으로 추가.
+   - 수정 파일: `README.md`만 수정(요구사항 준수).
+   - 검증: `git diff --check` clean.
+
 ## 7. Known limitations (알려진 한계)
 
 - **F1 (minor, SPEC §9)**: CSS breakpoint `1024px`/`600px` vs SPEC `768px`/`390px`

@@ -18,7 +18,9 @@ PR #1–#4 전부 병합 완료)에 대해, 실제로 재실행한 검증 결과
 - **Golden Demo 논지**: "에이전트가 코드를 쓴다"가 아니라, **게이트된 순차적 에이전트 팀이
   어떻게 공개 감사 흔적(branch, commit author, PR, 리뷰, CI, 병합 커밋)을 남기며
   계약 → 구현 → 독립 검증 → 문서/릴리즈를 진행하는가**를 보여주는 것이 본 데모의 핵심입니다.
-  - 각 스테이지는 최신 병합 `main`에서 시작하고, 각 프로필은 고유 Git author identity로 커밋합니다.
+  - 각 스테이지는 최신 병합 `main`에서 시작하고, 각 프로필은 고유 Git author identity로 커밋하는 것이
+    의도된 규칙입니다(단, PR #1 head 커밋 `b438d9ed3c7905b74f064b99cfbba012b9133896`은
+    worktree identity drift로 `Coco Orchestrator`로 기록된 알려진 예외 — §7.2 참조).
   - 구현자(Kongyi)가 유일한 검증자가 아닙니다: Bori가 독립 fresh-DB 검증과 정적 보안 리뷰를 수행하고,
     Coco가 CI + 브라우저 게이트를 통과시킨 뒤에만 병합합니다.
   - 단일 GitHub 로그인 제약 때문에 형식적 self-approval은 불가능하며,
