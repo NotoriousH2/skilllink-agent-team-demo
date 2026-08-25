@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}내 활동 - SkillLink{% endblock %}
+{% block content %}
+<h1>내 활동</h1>
+<section>
+  <h2>내가 만든 게시물</h2>
+  <ul class="simple-list">
+    {% for l in my_listings %}
+    <li><a href="/listings/{{ l.id }}">{{ l.title }}</a> <span class="badge badge-status status-{{ l.status }}">{{ listing_status_labels[l.status] }}</span></li>
+    {% else %}
+    <li class="empty">게시물이 없습니다.</li>
+    {% endfor %}
+  </ul>
+</section>
+<section>
+  <h2>내가 보낸 신청</h2>
+  <ul class="simple-list">
+    {% for a in my_apps %}
+    <li><a href="/listings/{{ a.listing_id }}">{{ a.listing_title }}</a> <span class="badge app-status status-{{ a.status }}">{{ application_status_labels[a.status] }}</span></li>
+    {% else %}
+    <li class="empty">신청이 없습니다.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

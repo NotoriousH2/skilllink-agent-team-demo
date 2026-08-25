@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SkillLink{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/">SkillLink</a>
+      <nav class="user-switcher">
+        <span class="current-user">{{ current_name }}</span>
+        <a href="/users/select/1">김민수</a>
+        <a href="/users/select/2">이서연</a>
+        <a href="/users/select/3">박준호</a>
+        <a href="/users/select/4">최다은</a>
+        <a href="/users/select/operator">운영자</a>
+      </nav>
+      {% if not is_operator %}
+      <a class="btn btn-primary" href="/listings/new">게시물 만들기</a>
+      {% endif %}
+    </div>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
