@@ -49,12 +49,12 @@
 
 ### 3.1 PR #1–#4 (전부 병합 완료)
 
-| PR | 제목 | 브랜치 | Head SHA | 병합 커밋 | 병합일 (UTC) | 역할/author |
-|---|---|---|---|---|---|---|
-| [#1](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/1) | docs(spec): define SkillLink acceptance contract | `agent/nari-spec` | `b438d9ed3c7905b74f064b99cfbba012b9133896` | `5c2c610a68c069a4a2a9f03b656a10ce9cefa0bc` | 2026-08-24T23:25:28Z | Nari Spec Critic <nari@notolab.local> |
-| [#2](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/2) | ci: make bootstrap workflow valid before implementation | `ci/fix-bootstrap-workflow` | `453fd8d121de2194ec93be8748d95f8854523185` | `414214e733bcd53f50b9676b94d44a48b68d2032` | 2026-08-24T23:22:15Z | Coco Orchestrator <coco@notolab.local> |
-| [#3](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/3) | feat: implement SkillLink marketplace contract | `agent/kongyi-implementation` | `84b2af7b872563c6b5b5b8e2f2c2b62c0826bcb3` | `5d70abacd26a26aa3e7defc7bf55f068f5522ea2` | 2026-08-25T00:05:42Z | Kongyi Implementation Worker <kongyi@notolab.local> |
-| [#4](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/4) | test: record independent Bori QA evidence | `agent/bori-qa` | `7ec4d486018afad33a00b1051678f2425c50e539` | `7e3272e8bc72ec909fbf672352e6d85ca4d6281c` | 2026-08-25T00:11:04Z | Bori Independent QA <bori@notolab.local> |
+| PR | 제목 | 브랜치 | Head SHA | 병합 커밋 | 병합일 (UTC) | 스테이지 owner | Head commit author |
+|---|---|---|---|---|---|---|---|
+| [#1](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/1) | docs(spec): define SkillLink acceptance contract | `agent/nari-spec` | `b438d9ed3c7905b74f064b99cfbba012b9133896` | `5c2c610a68c069a4a2a9f03b656a10ce9cefa0bc` | 2026-08-24T23:25:28Z | Nari Spec Critic | `Coco Orchestrator <coco@notolab.local>` (worktree identity drift, §6 참조) |
+| [#2](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/2) | ci: make bootstrap workflow valid before implementation | `ci/fix-bootstrap-workflow` | `453fd8d121de2194ec93be8748d95f8854523185` | `414214e733bcd53f50b9676b94d44a48b68d2032` | 2026-08-24T23:22:15Z | Coco Orchestrator | `Coco Orchestrator <coco@notolab.local>` |
+| [#3](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/3) | feat: implement SkillLink marketplace contract | `agent/kongyi-implementation` | `84b2af7b872563c6b5b5b8e2f2c2b62c0826bcb3` | `5d70abacd26a26aa3e7defc7bf55f068f5522ea2` | 2026-08-25T00:05:42Z | Kongyi Implementation Worker | `Kongyi Implementation Worker <kongyi@notolab.local>` |
+| [#4](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/4) | test: record independent Bori QA evidence | `agent/bori-qa` | `7ec4d486018afad33a00b1051678f2425c50e539` | `7e3272e8bc72ec909fbf672352e6d85ca4d6281c` | 2026-08-25T00:11:04Z | Bori Independent QA | `Bori Independent QA <bori@notolab.local>` |
 
 ### 3.2 리뷰/게이트 (COMMENTED, 명시적 verdict)
 
@@ -107,11 +107,36 @@
 - **Nari 2차 수정 커밋**(`b438d9ed3c7905b74f064b99cfbba012b9133896`):
   - 지속적 Nari 세션에서 실행되었지만, repository-local identity가 worktree 간에 공유되어
     실수로 `Coco Orchestrator <coco@notolab.local>`로 author가 기록됨.
+  - PR #1의 초기 커밋(`4dee1352d5f5007a24d97054c2e2ae4a644d9367`)은 `Nari Spec Critic <nari@notolab.local>`로
+    올바르게 기록되었지만, 2차 수정 커밋만 identity drift가 발생.
   - 이후 에이전트들은 커밋마다 `-c user.name=... -c user.email=...`로 명시적 author를 지정하여
     이 문제를 방지(Kongyi, Bori 커밋은 각자 고유 identity).
   - 이 주의사항은 커밋 author의 불완전성을 투명하게 기록하기 위한 것.
 - **Dori 커밋**: 본 PR의 커밋은 `Dori Documentation Release <dori@notolab.local>`로
   `-c user.name=... -c user.email=...` 명시적 author 지정.
+
+## 6.1 Review correction (Coco CHANGES REQUESTED 반영)
+
+Coco의 PR #5 리뷰(2026-08-25, CHANGES REQUESTED)를 반영:
+
+1. **README §4.2 false port instruction**:
+   - 문제: `SKILLLINK_PORT=9000` env 변수는 애플리케이션이 읽지 않으며, uvicorn 명령은 `--port 8321`을 하드코딩.
+   - 수정: `SKILLLINK_PORT` env 변수 언급을 제거하고, `--port 9000` 인자를 직접 사용하는 정확한 명령으로 교체.
+
+2. **Operator GET wording**:
+   - 문제: README가 operator가 "모든 GET 페이지"에 접근 가능하다고 기술했지만, `/activity`는 명시적으로 403.
+   - 수정: "공개 페이지(홈, 게시물 상세, `/health`, `/users/select/*`)와 `/admin`만 읽기 전용 접근 가능, `/activity`는 403"으로 재작성.
+   - README §5.1, §5.4, CHANGELOG, DORI_RELEASE_REPORT의 모든 관련 요약 문구 정렬.
+
+3. **Nari author attribution tables**:
+   - 문제: PR #1 head `b438d9e`는 `Coco Orchestrator`가 author이지만, README/CHANGELOG/Dori report의 PR 테이블이
+     head role/author를 Nari로 제시.
+   - 수정: 각 테이블을 "스테이지 owner"와 "Head commit author"로 분리하여 사실대로 기록.
+     - PR #1: 스테이지 owner = Nari Spec Critic, Head commit author = `Coco Orchestrator <coco@notolab.local>` (worktree identity drift)
+     - PR #1 초기 커밋(`4dee135`)은 `Nari Spec Critic <nari@notolab.local>`로 올바르게 기록됨.
+   - "각 스테이지 커밋이 고유 role author를 가진다"는 일반적 주장에 PR #1 head 커밋 예외를 명시.
+
+**검증**: `git diff --check` clean, 3개 파일(README.md, CHANGELOG.md, agent_reports/DORI_RELEASE_REPORT.md)만 수정.
 
 ## 7. Known limitations (알려진 한계)
 

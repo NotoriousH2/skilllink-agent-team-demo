@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **공개 에이전트 팀 워크플로우**: Nari(계약) → Coco(리뷰/게이트) → Kongyi(구현) → Bori(독립 QA) → Dori(문서/릴리즈)
   - PR #1: [docs(spec): define SkillLink acceptance contract](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/1)
     - Head `b438d9ed3c7905b74f064b99cfbba012b9133896`, 병합 `5c2c610a68c069a4a2a9f03b656a10ce9cefa0bc`
-    - Nari Spec Critic <nari@notolab.local>, Coco 리뷰(CHANGES REQUESTED → ACCEPT)
+    - 스테이지 owner: Nari Spec Critic, Head commit author: `Coco Orchestrator <coco@notolab.local>` (worktree identity drift, README §7.2 참조)
+    - Coco 리뷰(CHANGES REQUESTED → ACCEPT)
   - PR #2: [ci: make bootstrap workflow valid before implementation](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/2)
     - Head `453fd8d121de2194ec93be8748d95f8854523185`, 병합 `414214e733bcd53f50b9676b94d44a48b68d2032`
     - Coco Orchestrator <coco@notolab.local>, Coco 리뷰(ACCEPT)
@@ -70,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Agent Workflow
 - **공개 순차 에이전트 팀**: Nari → Coco → Kongyi → Bori → Dori
-- **역할 귀속**: 각 프로필은 고유 Git author identity로 커밋
+- **역할 귀속**: 각 프로필은 고유 Git author identity로 커밋 — 단, PR #1의 head 커밋(`b438d9ed3c7905b74f064b99cfbba012b9133896`)은
+  worktree identity drift로 인해 `Coco Orchestrator`로 기록됨(README §7.2 참조)
   - Nari Spec Critic <nari@notolab.local>
   - Coco Orchestrator <coco@notolab.local>
   - Kongyi Implementation Worker <kongyi@notolab.local>

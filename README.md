@@ -91,10 +91,12 @@ uv sync --locked --group dev
 
 # 로컬 시작(기본 포트 8321, host 항상 127.0.0.1)
 uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
-# 또는 env로 포트 변경: SKILLLINK_PORT=9000 (기본 8321)
+
+# 다른 포트(예: 9000)로 시작하려면 --port 인자를 직접 변경
+uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 9000
 
 # 브라우저에서 열기
-# http://127.0.0.1:8321/
+# http://127.0.0.1:8321/  (또는 --port로 지정한 포트)
 ```
 
 - **데모 리셋**: `data/skilllink.db` 삭제 후 재시작(다른 리셋 API/명령 없음).
@@ -112,7 +114,7 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
 
 - 현재 사용자는 cookie `current_user_id`(값: `1`~`4` 또는 `operator`, 미설정 시 기본 `1`)로 결정.
 - 전환: `GET /users/select/{value}` → `Set-Cookie: current_user_id=<value>; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000` + `302` → `/`.
-- **operator**는 `users` 테이블에 없는 관측 전용 페르소나: 모든 GET 페이지 접근 가능, 모든 POST는 403, `/admin`만 200(나머지 사용자 `/admin`은 403), `/activity`는 403.
+- **operator**는 `users` 테이블에 없는 관측 전용 페르소나: 공개 페이지(홈, 게시물 상세, `/health`, `/users/select/*`)와 `/admin`만 읽기 전용 접근 가능, 모든 POST는 403, `/activity`는 403.
 
 ### 5.2 시드 데이터 (고정값, SPEC §3)
 - **listings 8건**: id 1~8, owner 1~4, category study/repair/cooking/tech/other, type offer/request,
@@ -128,7 +130,9 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
 - **불변식**: L1 자기 게시물 신청 금지, L2 matched는 accepted 1개만, L3 matched는 새 신청 불가, L4 동일 (listing, applicant) pending 최대 1개, L5 시드 후 users 4/listings 8/applications 3.
 
 ### 5.4 권한 경계 (SPEC §5.1)
-- 모든 GET: 데모 사용자 1~4, operator.
+- 공개 GET(홈, 게시물 상세, `/health`, `/users/select/*`): 데모 사용자 1~4, operator.
+- `GET /activity`: 데모 사용자 1~4만(operator 403).
+- `GET /admin`: operator만(나머지 403).
 - `POST /listings`(생성): 데모 사용자만(operator 금지).
 - `POST /listings/{id}`(수정): owner만, status=open만.
 - `POST /listings/{id}/cancel`: owner만, status ∈ {open, matched}.
@@ -136,8 +140,6 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
 - `POST /applications`(신청): owner가 아닌 데모 사용자, listing.status=open, L4 충족.
 - `POST /applications/{id}/accept|reject`: listing owner만, application.status=pending.
 - `POST /applications/{id}/cancel`: applicant만, application.status=pending.
-- `GET /activity`: 데모 사용자 1~4만(operator 403).
-- `GET /admin`: operator만(나머지 403).
 - **상태코드 순서**: 존재 확인(404) → 권한(403) → 상태(409) → 필드 검증(422).
 
 ## 6. 결정적 검증 (실제 재실행 결과)
@@ -175,16 +177,17 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
 
 ## 7. 공개 순차 GitHub 워크플로우 (PR #1–#4)
 
-| PR | 제목 | 브랜치 | Head SHA | 병합 커밋 | 병합일 (UTC) | 역할/author | 리뷰/게이트 | CI |
-|---|---|---|---|---|---|---|---|---|
-| [#1](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/1) | docs(spec): define SkillLink acceptance contract | `agent/nari-spec` | `b438d9ed3c7905b74f064b99cfbba012b9133896` | `5c2c610a68c069a4a2a9f03b656a10ce9cefa0bc` | 2026-08-24T23:25:28Z | Nari Spec Critic <nari@notolab.local> | Coco: CHANGES REQUESTED → 재리뷰 ACCEPT | contract/quality pass |
-| [#2](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/2) | ci: make bootstrap workflow valid before implementation | `ci/fix-bootstrap-workflow` | `453fd8d121de2194ec93be8748d95f8854523185` | `414214e733bcd53f50b9676b94d44a48b68d2032` | 2026-08-24T23:22:15Z | Coco Orchestrator <coco@notolab.local> | Coco: ACCEPT | contract/quality pass |
-| [#3](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/3) | feat: implement SkillLink marketplace contract | `agent/kongyi-implementation` | `84b2af7b872563c6b5b5b8e2f2c2b62c0826bcb3` | `5d70abacd26a26aa3e7defc7bf55f068f5522ea2` | 2026-08-25T00:05:42Z | Kongyi Implementation Worker <kongyi@notolab.local> | Bori: ACCEPT(독립) + Coco: ACCEPT(병합 게이트) | contract/quality pass |
-| [#4](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/4) | test: record independent Bori QA evidence | `agent/bori-qa` | `7ec4d486018afad33a00b1051678f2425c50e539` | `7e3272e8bc72ec909fbf672352e6d85ca4d6281c` | 2026-08-25T00:11:04Z | Bori Independent QA <bori@notolab.local> | Coco: ACCEPT | contract/quality pass |
+| PR | 제목 | 브랜치 | Head SHA | 병합 커밋 | 병합일 (UTC) | 스테이지 owner | Head commit author | 리뷰/게이트 | CI |
+|---|---|---|---|---|---|---|---|---|---|
+| [#1](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/1) | docs(spec): define SkillLink acceptance contract | `agent/nari-spec` | `b438d9ed3c7905b74f064b99cfbba012b9133896` | `5c2c610a68c069a4a2a9f03b656a10ce9cefa0bc` | 2026-08-24T23:25:28Z | Nari Spec Critic | `Coco Orchestrator <coco@notolab.local>` (worktree identity drift, §7.2 참조) | Coco: CHANGES REQUESTED → 재리뷰 ACCEPT | contract/quality pass |
+| [#2](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/2) | ci: make bootstrap workflow valid before implementation | `ci/fix-bootstrap-workflow` | `453fd8d121de2194ec93be8748d95f8854523185` | `414214e733bcd53f50b9676b94d44a48b68d2032` | 2026-08-24T23:22:15Z | Coco Orchestrator | `Coco Orchestrator <coco@notolab.local>` | Coco: ACCEPT | contract/quality pass |
+| [#3](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/3) | feat: implement SkillLink marketplace contract | `agent/kongyi-implementation` | `84b2af7b872563c6b5b5b8e2f2c2b62c0826bcb3` | `5d70abacd26a26aa3e7defc7bf55f068f5522ea2` | 2026-08-25T00:05:42Z | Kongyi Implementation Worker | `Kongyi Implementation Worker <kongyi@notolab.local>` | Bori: ACCEPT(독립) + Coco: ACCEPT(병합 게이트) | contract/quality pass |
+| [#4](https://github.com/NotoriousH2/skilllink-agent-team-demo/pull/4) | test: record independent Bori QA evidence | `agent/bori-qa` | `7ec4d486018afad33a00b1051678f2425c50e539` | `7e3272e8bc72ec909fbf672352e6d85ca4d6281c` | 2026-08-25T00:11:04Z | Bori Independent QA | `Bori Independent QA <bori@notolab.local>` | Coco: ACCEPT | contract/quality pass |
 
 - **병합 커밋 author**: 전부 `변형호(Hyungho Byun) <Notorioush2@snu.ac.kr>`(공유 GitHub 로그인).
 - **역할 커밋 author**: 각 스테이지 프로필의 고유 identity(`nari@notolab.local`, `coco@notolab.local`,
-  `kongyi@notolab.local`, `bori@notolab.local`).
+  `kongyi@notolab.local`, `bori@notolab.local`) — 단, PR #1의 head 커밋(`b438d9ed3c7905b74f064b99cfbba012b9133896`)은
+  worktree identity drift로 인해 `Coco Orchestrator`로 기록됨(§7.2 참조).
 - **CI**: `.github/workflows/ci.yml`의 `contract`(bootstrap 파일 존재 검증)와 `quality`
   (`uv sync --locked --group dev` / `compileall` / `ruff check` / `ruff format --check` / `pytest -q` / `golden_smoke.py`)
   job이 모든 PR에서 pass.
@@ -198,6 +201,8 @@ uv run python -m uvicorn app.main:app --host 127.0.0.1 --port 8321
 - Nari의 2차 수정(취소 actor 계약 통일, `b438d9ed3c7905b74f064b99cfbba012b9133896`)은
   **지속적 Nari 세션에서 실행**되었지만, repository-local identity가 worktree 간에 공유되어
   실수로 `Coco Orchestrator <coco@notolab.local>`로 author가 기록되었습니다.
+- PR #1의 초기 커밋(`4dee1352d5f5007a24d97054c2e2ae4a644d9367`)은 `Nari Spec Critic <nari@notolab.local>`로
+  올바르게 기록되었지만, 2차 수정 커밋만 identity drift가 발생했습니다.
 - 이후 에이전트들은 **커밋마다 `-c user.name=... -c user.email=...`로 명시적 author를 지정**하여
   이 문제를 방지합니다(예: Kongyi, Bori 커밋은 각자 고유 identity).
 - 이 주의사항은 커밋 author의 불완전성을 투명하게 기록하기 위한 것입니다.
